@@ -1,0 +1,1 @@
+# Latent sound painting### Exhibition at the Pompidou CenterPhilippe Esling x ACIDS Team - 2022
