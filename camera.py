@@ -16,7 +16,6 @@
 import cv2
 import numpy as np
 from multiprocessing import Event
-from pyo import *
 import sounddevice as sd
 
 class Camera():    
