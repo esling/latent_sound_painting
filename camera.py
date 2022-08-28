@@ -182,7 +182,7 @@ class Camera():
                 # Movement detection
                 self.detect_movement(state)
                 # Foreground detection
-                self._fg_mask = np.float32(self._back_sub.apply(img))
+                self._fg_mask = np.int8(self._back_sub.apply(img))
                 self._contours = self._fg_mask.copy()
                 if (self._movement):
                     # Perform contour detection
