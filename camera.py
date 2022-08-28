@@ -16,6 +16,7 @@
 import cv2
 import numpy as np
 from multiprocessing import Event
+from pyo import *
 
 class Camera():    
     '''
@@ -51,12 +52,15 @@ class Camera():
         self._prev_img = None
         self._cur_img = None
         self._init_img = None
+        self._cur_centroid = []
         # Various camera detection modes
         self._movement = False
         self._movement_started = False
         self._movement_stopped = False
         self._fg_detect = fg_detect
         self._optical_flow = optical_flow
+        self._pitch = 0
+        self._amp = 0
         
     def preprocess_img(self, img):
         """
@@ -153,14 +157,20 @@ class Camera():
         contours = sorted(contours, key = cv2.contourArea, reverse = True) 
         # Select long perimeters only
         perimeters = [cv2.arcLength(contours[i], True) for i in range(len(contours))]
-        listindex = [i for i in range(min(5, len(perimeters))) if perimeters[i] > perimeters[0]/2]
+        listindex = [i for i in range(min(1, len(perimeters))) if perimeters[i] > perimeters[0]/2]
         # Add contours to image
-        # self._contours = blur.copy()
         [cv2.drawContours(self._contours, [contours[i]], 0, (0,255,0), 5) for i in listindex]
-        print("Found contours : ")
-        for i in listindex:
-            print(contours[i])
-    
+        if len(listindex) > 0:
+            self._cur_centroid = np.mean(contours[listindex[0]], axis = 0)
+            self._contours = cv2.circle(self._contours, (int(self._cur_centroid[0, 0]), int(self._cur_centroid[0, 1])), 10, [0, 0, 1], -1)
+            print(self._cur_centroid)
+            self._pitch = self._cur_centroid * 10
+            self._amp = self._cur_centroid[0, 1] / 500.0
+        else:
+            self._cur_centroid = []
+            self._pitch = 0
+            self._amp = 0
+
     def read_loop(self, state):
         """
         
