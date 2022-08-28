@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
+"""
 
-from graphics.config import config as graph_cfg
+ ~ Latent sound painting // Pompidou center ~
+ config.py : Main class for global configuration values
+ 
+ Author               :  Philippe Esling
+                        <esling@ircam.fr>
+ 
+ All authors contributed equally to the project.
+ 
+"""
 
 class config:
-    # Global neurorack info
-    class neurorack:
-        device      = 'Neurorack'
+    # Global program info
+    class painter:
+        device      = 'Latent sound painter'
         version     =  0.01
-    
-    # Global screen info
-    class screen:
-        # Screen modes
-        mode_init   = 0
-        mode_main   = 1
-        mode_menu   = 2
-        # General screen properties
-        height      = 240
-        width       = 180
-        # Display config
-        padding     = -2
-        main_x      = 0
-        bg_image    = './data/acids.png' 
     
     # Global audio info
     class audio:
@@ -44,8 +39,4 @@ class config:
         cv3         = 5
         cv4         = 6
         cv5         = 7
-
-    # Add the graphics classes
-    colors = graph_cfg.colors
-    text = graph_cfg.text
     

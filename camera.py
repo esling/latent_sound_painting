@@ -7,7 +7,7 @@
  behavior. 
  
  Author               :  Philippe Esling
-                        <esling@google.com>
+                        <esling@ircam.fr>
  
  All authors contributed equally to the project.
  

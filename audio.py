@@ -1,6 +1,6 @@
 """
 
- ~ Neurorack project ~
+ ~ Latent sound painting // Pompidou center ~
  Audio : Class for the audio handling
  
  This class contains all audio-processing stuff in the Neurorack.
@@ -9,8 +9,8 @@
          play_noise
          play_model
  
- Author               :  Ninon Devis, Philippe Esling, Martin Vert
-                        <{devis, esling}@ircam.fr>
+ Author               :  Philippe Esling
+                        <esling@ircam.fr>
  
  All authors contributed equally to the project and are listed aphabetically.
 
@@ -21,7 +21,7 @@ import sounddevice as sd
 from models.ddsp import DDSP
 from models.nsf_impacts import NSF
 from multiprocessing import Event
-
+from config import config
 
 class Audio():
     '''

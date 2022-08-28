@@ -1,13 +1,13 @@
 """
 
  ~ Latent sound painting // Pompidou center ~
- camera.py : Main class for camera handling
+ paint.py : Main class for paint handling
  
  This file defines the overall behavior of the latent control through painitng
  behavior. 
  
  Author               :  Philippe Esling
-                        <esling@google.com>
+                        <esling@ircam.fr>
  
  All authors contributed equally to the project.
  
