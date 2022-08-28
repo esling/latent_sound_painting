@@ -166,7 +166,8 @@ class Camera():
                 self.detect_movement(state)
                 # Foreground detection
                 if (self._fg_detect is not None):
-                    self._fg_mask = np.float32(self._back_sub.apply(img) > 127)
+                    self._fg_mask = np.float32(self._back_sub.apply(img))
+                    print(np.max(self._fg_mask))
                 # Optical flow
                 if (self._optical_flow is not None):
                     if (self._movement_started):
