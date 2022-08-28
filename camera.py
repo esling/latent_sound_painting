@@ -17,6 +17,7 @@ import cv2
 import numpy as np
 from multiprocessing import Event
 from pyo import *
+import sounddevice as sd
 
 class Camera():    
     '''
@@ -59,6 +60,7 @@ class Camera():
         self._movement_stopped = False
         self._fg_detect = fg_detect
         self._optical_flow = optical_flow
+        self.set_defaults()
         self._pitch = 0
         self._amp = 0
         
@@ -171,6 +173,42 @@ class Camera():
             self._pitch = 0
             self._amp = 0
 
+    def set_defaults(self):
+        '''
+            Sets default parameters for the soundevice library.
+            See 
+        '''
+        sd.default.samplerate = 44100
+        sd.default.device = 0
+        sd.default.latency = 'low'
+        sd.default.dtype = 'float32'
+        sd.default.blocksize = 0
+        sd.default.clip_off = False
+        sd.default.dither_off = False
+        sd.default.never_drop_input = False
+        
+    def play_sine(self, state):
+        '''
+            Play a sinus signal 
+            Parameters:
+                amplitude:  [float], optional
+                            Amplitude of the sinusoid
+                length:     [int], optional
+                            Length of signal to generate (in seconds)
+        '''
+
+        def callback(outdata, frames, time, status):
+            if status:
+                # print(status)
+                print('')
+            global start_idx
+            t = (start_idx + np.arange(frames)) / 44100
+            t = t.reshape(-1, 1)
+            outdata[:] = self._amp * np.sin(2 * np.pi * self._pitch * t)
+            start_idx += frames
+
+        sd.OutputStream(device=sd.default.device, channels=1, callback=callback, samplerate=44100)
+
     def read_loop(self, state):
         """
         
@@ -185,6 +223,7 @@ class Camera():
         None.
 
         """
+        self.play_sine()
         while True:
             # Read current camera value
             result, img = self._camera.read()
