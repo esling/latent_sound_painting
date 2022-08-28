@@ -16,17 +16,14 @@
 
 """
 
-import sklearn
 import numpy as np
 import sounddevice as sd
-from parallel import ProcessInput
 from models.ddsp import DDSP
 from models.nsf_impacts import NSF
-from multiprocessing import Event, Process
-from config import config
+from multiprocessing import Event
 
 
-class Audio(ProcessInput):
+class Audio():
     '''
         The Audio class handles every aspect related to audio generation.
         It is based on the ProcessInput system for multiprocessing
