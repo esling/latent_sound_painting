@@ -27,7 +27,7 @@ class Camera():
     def __init__(self, 
             callback: callable,
             port: int = 0,
-            threshold: float = 1e-3,
+            threshold: float = 5e-4,
             fg_detect: str = "KNN",
             optical_flow: str = None
             ):
@@ -145,15 +145,17 @@ class Camera():
             cv2.imshow("flow", self._mask)
             
     def detect_contours(self, state):
-        blur = cv2.GaussianBlur(self._fg_mask, (1,1), 1000)
-        flag, thresh = cv2.threshold(blur, 120, 255, cv2.THRESH_BINARY)
+        gray = cv2.cvtColor(self._cur_img * np.repeat((self._fg_mask / 255.0)[:, :, np.newaxis], 3, axis=2), cv2.COLOR_RGB2GRAY)
+        blur = cv2.GaussianBlur(gray, (5,5), 5000)
+        flag, thresh = cv2.threshold(np.uint8(blur * 255), 150, 255, cv2.THRESH_BINARY)
         # Find contours
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key = cv2.contourArea, reverse = True) 
         # Select long perimeters only
         perimeters = [cv2.arcLength(contours[i], True) for i in range(len(contours))]
-        listindex = [i for i in range(15) if perimeters[i] > perimeters[0]/2]
+        listindex = [i for i in range(min(5, len(perimeters))) if perimeters[i] > perimeters[0]/2]
         # Add contours to image
+        # self._contours = blur.copy()
         [cv2.drawContours(self._contours, [contours[i]], 0, (0,255,0), 5) for i in listindex]
         print("Found contours : ")
         for i in listindex:
@@ -182,11 +184,11 @@ class Camera():
                 # Movement detection
                 self.detect_movement(state)
                 # Foreground detection
-                self._fg_mask = np.int8(self._back_sub.apply(img))
-                self._contours = self._fg_mask.copy()
-                if (self._movement):
+                self._fg_mask = np.float32(self._back_sub.apply(img))
+                self._contours = self._cur_img.copy()
+                #if (self._movement):
                     # Perform contour detection
-                    self.detect_contours(state)
+                self.detect_contours(state)
                 # Optical flow
                 if (self._optical_flow is not None):
                     if (self._movement_started):
