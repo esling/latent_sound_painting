@@ -30,7 +30,7 @@ class Camera():
             callback: callable,
             port: int = 0,
             threshold: float = 1e-3,
-            fg_detect: str = "MOG2",
+            fg_detect: str = "KNN",
             optical_flow: str = "LK"
             ):
         '''
@@ -166,7 +166,7 @@ class Camera():
                 self.detect_movement(state)
                 # Foreground detection
                 if (self._fg_detect is not None):
-                    self._fg_mask = self._back_sub.apply(img)
+                    self._fg_mask = np.float32(self._back_sub.apply(img) > 127)
                 # Optical flow
                 if (self._optical_flow is not None):
                     if (self._movement_started):
