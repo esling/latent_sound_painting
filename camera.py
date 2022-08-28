@@ -29,7 +29,7 @@ class Camera():
             port: int = 0,
             threshold: float = 1e-3,
             fg_detect: str = "KNN",
-            optical_flow: str = "LK"
+            optical_flow: str = None
             ):
         '''
             Constructor - Creates a new instance of the Navigation class.
@@ -53,7 +53,8 @@ class Camera():
         self._init_img = None
         # Various camera detection modes
         self._movement = False
-        self._movement_started = True
+        self._movement_started = False
+        self._movement_stopped = False
         self._fg_detect = fg_detect
         self._optical_flow = optical_flow
         
@@ -90,6 +91,8 @@ class Camera():
                 self._movement = True
             else:
                 self._movement = False
+                self._movement_stopped = True
+                self._movement_started = False
             self._delta_img = delta_img
             
     def init_optical_flow(self, state):        
@@ -137,8 +140,24 @@ class Camera():
         cv2.imshow("delta", self._delta_img)
         if (self._fg_detect is not None):
             cv2.imshow("fg_mask", self._fg_mask)
+            cv2.imshow("contours", self._contours)
         if (self._optical_flow is not None):
             cv2.imshow("flow", self._mask)
+            
+    def detect_contours(self, state):
+        blur = cv2.GaussianBlur(self._fg_mask, (1,1), 1000)
+        flag, thresh = cv2.threshold(blur, 120, 255, cv2.THRESH_BINARY)
+        # Find contours
+        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key = cv2.contourArea, reverse = True) 
+        # Select long perimeters only
+        perimeters = [cv2.arcLength(contours[i], True) for i in range(len(contours))]
+        listindex = [i for i in range(15) if perimeters[i] > perimeters[0]/2]
+        # Add contours to image
+        [cv2.drawContours(self._contours, [contours[i]], 0, (0,255,0), 5) for i in listindex]
+        print("Found contours : ")
+        for i in listindex:
+            print(contours[i])
     
     def read_loop(self, state):
         """
@@ -163,9 +182,11 @@ class Camera():
                 # Movement detection
                 self.detect_movement(state)
                 # Foreground detection
-                if (self._fg_detect is not None):
-                    self._fg_mask = np.float32(self._back_sub.apply(img))
-                    print(np.max(self._fg_mask))
+                self._fg_mask = np.float32(self._back_sub.apply(img))
+                self._contours = self._fg_mask.copy()
+                if (self._movement):
+                    # Perform contour detection
+                    self.detect_contours(state)
                 # Optical flow
                 if (self._optical_flow is not None):
                     if (self._movement_started):
@@ -203,12 +224,12 @@ class Camera():
             self._camera = cv2.VideoCapture(self._port)
             # Create windows
             cv2.namedWindow("camera", cv2.WINDOW_AUTOSIZE)
-            cv2.namedWindow("delta", cv2.WINDOW_AUTOSIZE)
             # Compute base image
             self.burn_in(state)
             # Init detectors
             if (self._fg_detect is not None):
                 cv2.namedWindow("fg_mask", cv2.WINDOW_AUTOSIZE)
+                cv2.namedWindow("contours", cv2.WINDOW_AUTOSIZE)
                 if (self._fg_detect == 'MOG2'):
                     self._back_sub = cv2.createBackgroundSubtractorMOG2()
                 else:
