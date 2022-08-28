@@ -13,12 +13,11 @@
  
 """
 
-import cv2
-import numpy as np
 import argparse
-from camera import Camera
 import multiprocessing as mp
-from multiprocessing import Process, Manager, Queue, Value
+from multiprocessing import Process, Manager, Queue
+# Library imports
+from camera import Camera
 
 def callback_camera():
     print("Camera event")
